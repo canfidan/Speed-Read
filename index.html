@@ -10,19 +10,26 @@
 
     <div class="container">
         <div id="setup-panel">
-            <h2>Hızlı Okuma Modu</h2>
+            <h2>⚡ Hızlı Okuma Modu</h2>
             
+            <div class="quick-start">
+                <span>Hızlı Test Et:</span>
+                <button class="sample-btn" data-id="1">📚 Hızlı Okuma Nedir?</button>
+                <button class="sample-btn" data-id="2">🐴 Ömer Seyfettin</button>
+                <button class="sample-btn" data-id="3">🤖 Yapay Zeka</button>
+            </div>
+
             <div class="file-upload">
-                <label for="pdfInput" class="upload-btn">📂 PDF Yükle</label>
+                <label for="pdfInput" class="upload-btn">📂 Kendi PDF'ini Yükle</label>
                 <input type="file" id="pdfInput" accept="application/pdf" hidden>
                 <span id="fileName">Dosya seçilmedi</span>
             </div>
 
-            <textarea id="inputText" placeholder="Metni buraya yapıştır..."></textarea>
+            <textarea id="inputText" placeholder="Veya metni buraya yapıştır..."></textarea>
             
             <div class="controls">
-                <label>Hız (Ms): <input type="range" id="speedRange" min="50" max="1000" value="300"></label>
-                <label>Boyut: <input type="range" id="sizeRange" min="20" max="100" value="40"></label>
+                <label>Hız (Ms): <input type="range" id="speedRange" min="50" max="1000" value="150"></label>
+                <label>Boyut: <input type="range" id="sizeRange" min="20" max="100" value="45"></label>
             </div>
             
             <button id="startBtn">Okumaya Başla</button>
@@ -30,7 +37,6 @@
         </div>
 
         <div id="read-panel" class="hidden">
-            
             <div class="reading-area">
                 <div id="left-context"></div>
                 <div id="word-display">Hazır...</div>
@@ -40,8 +46,9 @@
             <div id="progress-bar">Kelime: 0 / 0</div>
             
             <div class="read-controls">
-                <button id="rewindBtn" class="secondary-btn">⏪ 10 Kelime</button>
-                <button id="stopBtn" class="primary-btn">Durdur / Çık</button>
+                <button id="rewindBtn" class="secondary-btn">⏪ 10</button>
+                <button id="pauseBtn" class="primary-btn">⏸️ Duraklat</button>
+                <button id="exitBtn" class="danger-btn">❌ Çıkış</button>
             </div>
         </div>
     </div>
