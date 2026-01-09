@@ -11,7 +11,14 @@
     <div class="container">
         <div id="setup-panel">
             <h2>Hızlı Okuma Modu</h2>
-            <textarea id="inputText" placeholder="Okumak istediğin metni buraya yapıştır..."></textarea>
+            
+            <div class="file-upload">
+                <label for="pdfInput" class="upload-btn">📂 PDF Yükle</label>
+                <input type="file" id="pdfInput" accept="application/pdf" hidden>
+                <span id="fileName">Dosya seçilmedi</span>
+            </div>
+
+            <textarea id="inputText" placeholder="Veya metni buraya yapıştır..."></textarea>
             
             <div class="controls">
                 <label>Hız (Ms): <input type="range" id="speedRange" min="50" max="1000" value="300"></label>
@@ -29,6 +36,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
