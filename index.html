@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hızlı Okuma Asistanı</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div id="setup-panel">
+            <h2>Hızlı Okuma Modu</h2>
+            <textarea id="inputText" placeholder="Okumak istediğin metni buraya yapıştır..."></textarea>
+            
+            <div class="controls">
+                <label>Hız (Ms): <input type="range" id="speedRange" min="50" max="1000" value="300"></label>
+                <label>Boyut: <input type="range" id="sizeRange" min="20" max="100" value="40"></label>
+            </div>
+            
+            <button id="startBtn">Okumaya Başla</button>
+        </div>
+
+        <div id="read-panel" class="hidden">
+            <div id="word-display">Hazır...</div>
+            <div class="read-controls">
+                <button id="stopBtn">Durdur / Geri Dön</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
