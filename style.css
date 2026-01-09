@@ -7,49 +7,59 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    overflow: hidden; /* Sayfa kaymasını engelle */
 }
 
 .container {
-    width: 95%; /* Telefondan taşmaması için */
+    width: 95%;
     max-width: 800px;
     text-align: center;
 }
 
-/* Okuma Alanı Düzeni */
+/* OKUMA ALANI: Çerçeve */
 .reading-area {
+    position: relative; /* İçindekileri serbest bırakmak için referans */
+    height: 200px;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 200px;
-    gap: 20px; /* Kelimeler arası boşluk */
-    overflow: hidden; /* Taşmayı engelle */
 }
 
-/* Sol ve Sağ Kelimeler */
-#left-context, #right-context {
-    font-size: 24px;
-    color: #555; /* Soluk gri */
-    flex: 1; /* Boş alanı kapla */
-    white-space: nowrap; /* Alt satıra inmesin */
-}
-
-#left-context {
-    text-align: right; /* Ortaya yasla */
-}
-
-#right-context {
-    text-align: left; /* Ortaya yasla */
-}
-
-/* Ana Kelime (Orta) */
+/* ANA KELİME: Çivili */
 #word-display {
+    position: absolute; /* Akıştan çıkar, bağımsız yap */
+    left: 50%; /* Tam ortaya koy */
+    transform: translateX(-50%); /* Kendi genişliğinin yarısı kadar geri çek (Tam ortalar) */
+    
     font-size: 50px;
     font-weight: bold;
     color: #00ffcc; /* Neon yeşil */
-    flex: 0 0 auto; /* Kendi boyutu kadar yer kaplasın */
+    z-index: 10; /* En üstte görünsün */
+    white-space: nowrap; /* Asla alt satıra inmesin */
 }
 
-/* Diğer Ayarlar */
+/* SOL VE SAĞ KELİMELER: Hayalet */
+#left-context, #right-context {
+    position: absolute; /* Bunlar da bağımsız */
+    font-size: 24px;
+    color: #444; /* Daha soluk gri */
+    width: 40%; /* Ekranın %40'ını kaplasınlar */
+    white-space: nowrap;
+    overflow: hidden; /* Çok uzunsa taşanı gizle */
+}
+
+#left-context {
+    right: 55%; /* Ortadan %5 uzak dursun */
+    text-align: right; /* Sağa yaslı (ortaya baksın) */
+}
+
+#right-context {
+    left: 55%; /* Ortadan %5 uzak dursun */
+    text-align: left; /* Sola yaslı (ortaya baksın) */
+}
+
+/* Diğer Buton ve Kutu Ayarları (Aynı) */
 .file-upload {
     margin-bottom: 15px;
     display: flex;
@@ -83,6 +93,7 @@ textarea {
     color: #888;
     margin-bottom: 20px;
     font-size: 14px;
+    margin-top: 10px;
 }
 
 .hidden { display: none; }
