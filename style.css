@@ -1,7 +1,7 @@
 body {
     background-color: #121212;
     color: white;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     display: flex;
     justify-content: center;
@@ -15,53 +15,43 @@ body {
     text-align: center;
 }
 
-/* OKUMA ALANI: Esnek Kutu */
+/* Okuma Alanı */
 .reading-area {
     display: flex;
-    align-items: center; /* Dikey ortala */
-    justify-content: space-between; /* Yayıl */
+    align-items: center;
+    justify-content: space-between;
     height: 200px;
     width: 100%;
     overflow: hidden;
+    margin-bottom: 10px;
 }
 
-/* YAN KELİMELER: Eşit Ağırlık (Flex 1) */
 #left-context, #right-context {
-    flex: 1; /* Kalan boşluğu eşit paylaşın */
-    min-width: 0; /* Çok sıkışırlarsa küçülmelerine izin ver */
+    flex: 1;
+    min-width: 0;
     font-size: 24px;
-    color: #444; /* Soluk gri */
-    white-space: nowrap; /* Alt satıra inme */
-    overflow: hidden; /* Taşarsa gizle */
-    text-overflow: clip; /* ... koyma direkt kes */
-}
-
-#left-context {
-    text-align: right; /* Yazıyı sağa (ortaya doğru) yasla */
-}
-
-#right-context {
-    text-align: left; /* Yazıyı sola (ortaya doğru) yasla */
-}
-
-/* ANA KELİME: Dokunulmaz */
-#word-display {
-    flex: 0 0 auto; /* Sadece kendi genişliğin kadar yer kapla */
-    padding: 0 30px; /* Yanlara boşluk (Tampon Bölge) */
-    
-    font-size: 50px; /* Büyük font */
-    font-weight: bold;
-    color: #00ffcc; /* Neon yeşil */
-    text-align: center;
+    color: #444;
     white-space: nowrap;
+    overflow: hidden;
 }
 
-/* Diğer Ayarlar (Standart) */
+#left-context { text-align: right; }
+#right-context { text-align: left; }
+
+#word-display {
+    flex: 0 0 auto;
+    padding: 0 30px;
+    font-size: 50px;
+    font-weight: bold;
+    color: #00ffcc;
+    text-align: center;
+}
+
+/* Kontroller */
 .file-upload {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     display: flex;
     justify-content: center;
-    align-items: center;
     gap: 10px;
 }
 
@@ -79,28 +69,41 @@ textarea {
     background: #333;
     color: white;
     border: none;
-    padding: 10px;
+    padding: 15px;
     border-radius: 10px;
     font-size: 16px;
     margin-bottom: 20px;
     resize: none;
 }
 
-#progress-bar {
-    color: #888;
-    margin-bottom: 20px;
-    font-size: 14px;
+#progress-bar { color: #888; margin-bottom: 15px; font-size: 14px; }
+
+/* Buton Grupları */
+.read-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+button {
+    border: none;
+    padding: 15px 30px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+button:active { transform: scale(0.98); }
+
+.primary-btn { background-color: #007bff; color: white; }
+.secondary-btn { background-color: #444; color: white; }
+#startBtn { background-color: #007bff; color: white; width: 100%; }
+
+#saved-status {
+    color: #ffc107;
     margin-top: 10px;
+    font-size: 14px;
 }
 
 .hidden { display: none; }
-
-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    font-size: 18px;
-    border-radius: 5px;
-    cursor: pointer;
-}

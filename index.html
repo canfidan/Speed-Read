@@ -18,7 +18,7 @@
                 <span id="fileName">Dosya seçilmedi</span>
             </div>
 
-            <textarea id="inputText" placeholder="Veya metni buraya yapıştır..."></textarea>
+            <textarea id="inputText" placeholder="Metni buraya yapıştır..."></textarea>
             
             <div class="controls">
                 <label>Hız (Ms): <input type="range" id="speedRange" min="50" max="1000" value="300"></label>
@@ -26,6 +26,7 @@
             </div>
             
             <button id="startBtn">Okumaya Başla</button>
+            <div id="saved-status" class="hidden">💾 Kaldığınız yerden devam ediliyor...</div>
         </div>
 
         <div id="read-panel" class="hidden">
@@ -39,7 +40,8 @@
             <div id="progress-bar">Kelime: 0 / 0</div>
             
             <div class="read-controls">
-                <button id="stopBtn">Durdur / Geri Dön</button>
+                <button id="rewindBtn" class="secondary-btn">⏪ 10 Kelime</button>
+                <button id="stopBtn" class="primary-btn">Durdur / Çık</button>
             </div>
         </div>
     </div>

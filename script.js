@@ -3,9 +3,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 const inputText = document.getElementById("inputText");
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
+const rewindBtn = document.getElementById("rewindBtn"); // YENİ
 const wordDisplay = document.getElementById("word-display");
-const leftContext = document.getElementById("left-context");   // YENİ
-const rightContext = document.getElementById("right-context"); // YENİ
+const leftContext = document.getElementById("left-context");
+const rightContext = document.getElementById("right-context");
 const setupPanel = document.getElementById("setup-panel");
 const readPanel = document.getElementById("read-panel");
 const speedRange = document.getElementById("speedRange");
@@ -13,18 +14,33 @@ const sizeRange = document.getElementById("sizeRange");
 const pdfInput = document.getElementById("pdfInput");
 const fileNameLabel = document.getElementById("fileName");
 const progressBar = document.getElementById("progress-bar");
+const savedStatus = document.getElementById("saved-status");
 
 let words = [];
 let currentIndex = 0;
-let intervalId = null;
+let isReading = false;
+let timeoutId = null;
 
-// PDF Yükleme
+// --- SAYFA AÇILINCA KAYIT KONTROLÜ ---
+window.addEventListener('load', () => {
+    const savedText = localStorage.getItem('speedReadText');
+    const savedIndex = localStorage.getItem('speedReadIndex');
+
+    if (savedText && savedText.length > 0) {
+        inputText.value = savedText;
+        savedStatus.classList.remove('hidden'); // "Kayıt bulundu" yazısı
+        savedStatus.innerText = `💾 Son okumadan kalan: %${Math.floor((savedIndex / savedText.split(/\s+/).length) * 100)}`;
+        if (savedIndex) currentIndex = parseInt(savedIndex);
+    }
+});
+
+// --- PDF YÜKLEME ---
 pdfInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     fileNameLabel.innerText = file.name;
-    inputText.value = "⏳ PDF okunuyor...";
+    inputText.value = "⏳ PDF işleniyor...";
     startBtn.disabled = true;
 
     try {
@@ -35,12 +51,15 @@ pdfInput.addEventListener('change', async (e) => {
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
-            const pageText = textContent.items.map(item => item.str).join(' ');
-            fullText += pageText + " ";
+            fullText += textContent.items.map(item => item.str).join(' ') + " ";
         }
 
         inputText.value = fullText;
         startBtn.disabled = false;
+        
+        // Yeni dosya yüklendiği için eski kaydı sıfırla
+        currentIndex = 0;
+        localStorage.removeItem('speedReadIndex');
         
     } catch (err) {
         console.error(err);
@@ -49,60 +68,96 @@ pdfInput.addEventListener('change', async (e) => {
     }
 });
 
+// --- BAŞLAT BUTONU ---
 startBtn.addEventListener("click", () => {
     const text = inputText.value.trim();
     if (!text || text.startsWith("⏳")) return;
 
-    words = text.split(/\s+/); // Boşluklara göre böl
-    currentIndex = 0;
+    // Metni hafızaya al (Auto-Save)
+    localStorage.setItem('speedReadText', text);
+    
+    words = text.split(/\s+/);
+    
+    // Eğer metin değiştiyse ve kayıtlı index çok ilerideyse sıfırla
+    if (currentIndex >= words.length) currentIndex = 0;
 
     setupPanel.classList.add("hidden");
     readPanel.classList.remove("hidden");
-
-    startReading();
+    isReading = true;
+    
+    readLoop(); // Döngüyü başlat
 });
 
-function startReading() {
-    const speed = parseInt(speedRange.value);
-
-    if (intervalId) clearInterval(intervalId);
-
-    intervalId = setInterval(() => {
+// --- OKUMA DÖNGÜSÜ (AKILLI DURAKSAMA) ---
+function readLoop() {
+    if (!isReading || currentIndex >= words.length) {
+        isReading = false;
         if (currentIndex >= words.length) {
-            stopReading();
-            return;
+             wordDisplay.innerText = "Bitti! 🎉";
+             localStorage.removeItem('speedReadIndex'); // Bitince kaydı sil
         }
-        
-        // 1. ORTA KELİME
-        wordDisplay.innerText = words[currentIndex];
+        return;
+    }
 
-        // 2. SOLDAKİ 3 KELİME (Varsa)
-        // Başlangıçta negatif index olmaması için Math.max kullanıyoruz
-        let startLeft = Math.max(0, currentIndex - 3);
-        let leftWords = words.slice(startLeft, currentIndex).join(" ");
-        leftContext.innerText = leftWords;
+    // Kelimeleri Göster
+    wordDisplay.innerText = words[currentIndex];
+    
+    // Yan kelimeler (Context)
+    let startLeft = Math.max(0, currentIndex - 3);
+    leftContext.innerText = words.slice(startLeft, currentIndex).join(" ");
+    rightContext.innerText = words.slice(currentIndex + 1, currentIndex + 4).join(" ");
 
-        // 3. SAĞDAKİ 3 KELİME (Varsa)
-        let rightWords = words.slice(currentIndex + 1, currentIndex + 4).join(" ");
-        rightContext.innerText = rightWords;
+    // İlerlemeyi Güncelle ve Kaydet
+    progressBar.innerText = `Kelime: ${currentIndex + 1} / ${words.length}`;
+    localStorage.setItem('speedReadIndex', currentIndex);
 
-        // İlerleme Çubuğu
-        progressBar.innerText = `Kelime: ${currentIndex + 1} / ${words.length}`;
-        
-        currentIndex++;
-    }, speed);
+    // --- AKILLI HIZ HESAPLAMA ---
+    let baseSpeed = parseInt(speedRange.value);
+    let delay = baseSpeed;
+    const currentWord = words[currentIndex];
+
+    // Noktalama işaretlerinde yavaşla
+    if (currentWord.endsWith('.') || currentWord.endsWith('!') || currentWord.endsWith('?')) {
+        delay = baseSpeed * 2.2; // Cümle sonu: 2 kat bekle
+    } else if (currentWord.endsWith(',') || currentWord.endsWith(';') || currentWord.endsWith(':')) {
+        delay = baseSpeed * 1.5; // Virgül: 1.5 kat bekle
+    } else if (currentWord.length > 10) {
+        delay = baseSpeed * 1.3; // Uzun kelime: Biraz yavaşla
+    }
+
+    currentIndex++;
+    
+    // Bir sonraki kelime için zamanlayıcı kur
+    timeoutId = setTimeout(readLoop, delay);
 }
 
-stopBtn.addEventListener("click", stopReading);
+// --- GERİ SARMA ---
+rewindBtn.addEventListener("click", () => {
+    if (timeoutId) clearTimeout(timeoutId); // Akışı durdur
+    currentIndex = Math.max(0, currentIndex - 20); // 20 kelime geri git
+    
+    // Anında ekrana yansıt
+    wordDisplay.innerText = words[currentIndex];
+    progressBar.innerText = `Geri sarıldı: ${currentIndex + 1}`;
+    
+    // 1 saniye bekleyip devam et
+    setTimeout(() => {
+        if(isReading) readLoop();
+    }, 1000);
+});
 
-function stopReading() {
-    clearInterval(intervalId);
+// --- DURDUR ---
+stopBtn.addEventListener("click", () => {
+    isReading = false;
+    if (timeoutId) clearTimeout(timeoutId);
+    
     setupPanel.classList.remove("hidden");
     readPanel.classList.add("hidden");
-    wordDisplay.innerText = "Hazır...";
-    leftContext.innerText = "";
-    rightContext.innerText = "";
-}
+    
+    // Durunca kaydı güncelle
+    savedStatus.innerText = `💾 Duraklatıldı: %${Math.floor((currentIndex / words.length) * 100)}`;
+    savedStatus.classList.remove('hidden');
+});
 
 sizeRange.addEventListener("input", (e) => {
     wordDisplay.style.fontSize = e.target.value + "px";
