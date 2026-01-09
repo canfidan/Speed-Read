@@ -1,5 +1,5 @@
 body {
-    background-color: #121212; /* İşte o siyah arkaplan */
+    background-color: #121212;
     color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
@@ -7,7 +7,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 20px;
+    padding: 10px; /* Telefondan kenarlara yapışmasın */
     box-sizing: border-box;
 }
 
@@ -15,13 +15,13 @@ body {
     width: 100%;
     max-width: 800px;
     text-align: center;
-    background-color: #1e1e1e; /* Kutunun kendi arkaplanı */
-    padding: 30px;
+    background-color: #1e1e1e;
+    padding: 20px;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
 
-h2 { color: #00ffcc; margin-bottom: 25px; }
+h2 { color: #00ffcc; margin-bottom: 20px; font-size: 24px; }
 
 /* Hızlı Başlangıç Butonları */
 .quick-start {
@@ -29,21 +29,22 @@ h2 { color: #00ffcc; margin-bottom: 25px; }
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: wrap; /* Telefondan taşarsa alt satıra geçsin */
 }
 
-.quick-start span { font-size: 14px; color: #aaa; }
+.quick-start span { font-size: 13px; color: #aaa; display: block; width: 100%; margin-bottom: 5px;}
 
 .sample-btn {
     background-color: #333;
     border: 1px solid #555;
     color: #ccc;
-    padding: 8px 15px;
-    font-size: 13px;
+    padding: 8px 12px;
+    font-size: 12px;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.2s;
+    flex: 1 1 auto; /* Kutuları esnek yap */
 }
 
 .sample-btn:hover {
@@ -57,19 +58,19 @@ h2 { color: #00ffcc; margin-bottom: 25px; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 180px;
+    height: 160px;
     width: 100%;
     overflow: hidden;
     margin-bottom: 10px;
     background-color: #121212;
     border-radius: 10px;
-    padding: 0 10px;
+    padding: 0 5px;
 }
 
 #left-context, #right-context {
     flex: 1;
     min-width: 0;
-    font-size: 22px;
+    font-size: 18px; /* Telefondan sığsın diye biraz küçülttük */
     color: #444;
     white-space: nowrap;
     overflow: hidden;
@@ -79,42 +80,79 @@ h2 { color: #00ffcc; margin-bottom: 25px; }
 
 #word-display {
     flex: 0 0 auto;
-    padding: 0 20px;
-    font-size: 50px;
+    padding: 0 10px;
+    font-size: 40px; /* Telefondan taşmaması için fontu optimize ettik */
     font-weight: bold;
     color: #00ffcc;
     text-align: center;
 }
 .highlight { color: #ff3333; text-shadow: 0 0 10px rgba(255, 51, 51, 0.8); }
 
-/* Diğer Kontroller */
-.file-upload {
-    margin-bottom: 20px;
-    display: flex; justify-content: center; gap: 10px;
-}
+/* Kontroller */
+.file-upload { margin-bottom: 20px; }
 .upload-btn {
-    background-color: #28a745; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;
+    display: inline-block;
+    background-color: #28a745; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; box-sizing: border-box;
 }
-textarea {
-    width: 100%; height: 120px; background: #333; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 16px; margin-bottom: 20px; resize: none; box-sizing: border-box;
-}
-.controls {
-    display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;
-}
-.controls label { display: flex; align-items: center; gap: 10px; }
-#progress-bar { color: #888; margin-bottom: 15px; font-size: 14px; }
 
-/* Ana Butonlar */
-.read-controls { display: flex; justify-content: center; gap: 10px; }
-button {
-    border: none; padding: 15px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; transition: transform 0.1s; font-weight: bold;
+textarea {
+    width: 100%; height: 100px; background: #333; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 16px; margin-bottom: 20px; resize: none; box-sizing: border-box;
 }
-button:active { transform: scale(0.95); }
-.primary-btn { background-color: #007bff; color: white; min-width: 100px; }
-.secondary-btn { background-color: #444; color: white; }
-.danger-btn { background-color: #dc3545; color: white; }
-.danger-btn:hover { background-color: #c82333; }
-#startBtn { background-color: #28a745; color: white; width: 100%; font-size: 18px; }
+
+.controls {
+    display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.controls label { display: flex; align-items: center; gap: 5px; font-size: 14px; }
+
+/* Ana Buton Grubu */
+.read-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap; /* Sığmazsa alt satıra geç */
+}
+
+button {
+    border: none;
+    padding: 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    /* Telefondan dokunmayı kolaylaştırmak için minimum yükseklik */
+    min-height: 50px; 
+}
+
+/* Başlat butonu */
+#startBtn { 
+    background-color: #28a745; 
+    color: white; 
+    width: 100%; 
+    font-size: 18px; 
+    margin-bottom: 20px;
+}
+
+.primary-btn { background-color: #007bff; color: white; flex: 2; } /* Duraklat daha geniş olsun */
+.secondary-btn { background-color: #444; color: white; flex: 1; } /* Geri sar daha dar */
+.danger-btn { background-color: #dc3545; color: white; flex: 1; } /* Çıkış dar */
 
 #saved-status { color: #ffc107; margin-top: 15px; font-size: 14px; }
 .hidden { display: none; }
+
+/* --- MOBİL İÇİN ÖZEL AYARLAR (En Önemli Kısım) --- */
+@media (max-width: 600px) {
+    .reading-area { height: 140px; }
+    #word-display { font-size: 32px; }
+    #left-context, #right-context { font-size: 14px; }
+    
+    /* Butonları telefonda alt alta değil ama daha rahat dizelim */
+    .read-controls {
+        flex-direction: row; /* Yan yana kalsın ama sığışsın */
+    }
+    
+    /* Buton metinlerini küçült */
+    button { font-size: 14px; padding: 10px; }
+    
+    /* Geri sar butonu çok yer kaplamasın, sadece ikon kalsın */
+    #rewindBtn { font-size: 12px; }
+}
