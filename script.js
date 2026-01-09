@@ -1,5 +1,10 @@
-// PDF.js Kütüphanesi Ayarları
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+// PDF Kütüphanesini Tanıt
+// Eğer pdfjsLib yüklenmediyse uyarı ver
+if (typeof pdfjsLib === 'undefined') {
+    alert("HATA: PDF kütüphanesi yüklenemedi! İnternet bağlantını kontrol et.");
+} else {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
 
 const inputText = document.getElementById("inputText");
 const startBtn = document.getElementById("startBtn");
@@ -16,43 +21,57 @@ let words = [];
 let currentIndex = 0;
 let intervalId = null;
 
-// PDF Yükleme İşlemi
+// PDF Yükleme Olayı
 pdfInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     fileNameLabel.innerText = file.name;
-    inputText.value = "PDF okunuyor, lütfen bekleyin...";
-    startBtn.disabled = true; // İşlem bitene kadar butonu kilitle
+    inputText.value = "⏳ PDF okunuyor, lütfen bekleyin...";
+    alert("Dosya seçildi: " + file.name + ". İşlem başlıyor...");
 
     try {
         const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+        
+        // PDF Belgesini Yükle
+        const loadingTask = pdfjsLib.getDocument(arrayBuffer);
+        const pdf = await loadingTask.promise;
+        
+        alert("PDF Başarıyla açıldı! Sayfa sayısı: " + pdf.numPages);
+
         let fullText = "";
 
+        // Sayfaları Tek Tek Gez
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
+            
+            // Sayfadaki yazıları birleştir
             const pageText = textContent.items.map(item => item.str).join(' ');
             fullText += pageText + " ";
         }
 
-        inputText.value = fullText;
-        startBtn.disabled = false; // İşlem bitti, butonu aç
-        alert("PDF başarıyla yüklendi! Okumaya başlayabilirsin.");
+        if (fullText.trim().length === 0) {
+            alert("UYARI: PDF içinde okunabilir metin bulunamadı! Bu bir resim veya taranmış kitap olabilir.");
+            inputText.value = "Bu PDF metin içermiyor (Resim olabilir).";
+        } else {
+            inputText.value = fullText;
+            alert("İşlem Tamam! " + fullText.length + " karakter okundu.");
+        }
         
     } catch (err) {
         console.error(err);
-        inputText.value = "Hata: PDF okunamadı.";
-        startBtn.disabled = false;
+        alert("BİR HATA OLUŞTU:\n" + err.message);
+        inputText.value = "Hata oluştu: " + err.message;
     }
 });
 
-// Başla Butonu
+// Başlat Butonu
 startBtn.addEventListener("click", () => {
     const text = inputText.value.trim();
-    if (!text) {
-        alert("Lütfen bir metin girin veya PDF yükleyin!");
+    // "PDF okunuyor" yazarken başlatmayı engelle
+    if (!text || text.startsWith("⏳") || text.startsWith("Hata")) {
+        alert("Lütfen geçerli bir metin yüklenmesini bekleyin.");
         return;
     }
 
@@ -61,14 +80,11 @@ startBtn.addEventListener("click", () => {
 
     setupPanel.classList.add("hidden");
     readPanel.classList.remove("hidden");
-
     startReading();
 });
 
-// Okuma Motoru
 function startReading() {
     const speed = parseInt(speedRange.value);
-
     if (intervalId) clearInterval(intervalId);
 
     intervalId = setInterval(() => {
@@ -81,7 +97,6 @@ function startReading() {
     }, speed);
 }
 
-// Durdur Butonu
 stopBtn.addEventListener("click", stopReading);
 
 function stopReading() {
@@ -91,7 +106,6 @@ function stopReading() {
     wordDisplay.innerText = "Hazır...";
 }
 
-// Boyut Ayarı
 sizeRange.addEventListener("input", (e) => {
     wordDisplay.style.fontSize = e.target.value + "px";
 });
