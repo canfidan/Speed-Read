@@ -7,59 +7,56 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    overflow: hidden; /* Sayfa kaymasını engelle */
 }
 
 .container {
-    width: 95%;
-    max-width: 800px;
+    width: 98%;
+    max-width: 900px;
     text-align: center;
 }
 
-/* OKUMA ALANI: Çerçeve */
+/* OKUMA ALANI: Esnek Kutu */
 .reading-area {
-    position: relative; /* İçindekileri serbest bırakmak için referans */
+    display: flex;
+    align-items: center; /* Dikey ortala */
+    justify-content: space-between; /* Yayıl */
     height: 200px;
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
 }
 
-/* ANA KELİME: Çivili */
-#word-display {
-    position: absolute; /* Akıştan çıkar, bağımsız yap */
-    left: 50%; /* Tam ortaya koy */
-    transform: translateX(-50%); /* Kendi genişliğinin yarısı kadar geri çek (Tam ortalar) */
-    
-    font-size: 50px;
-    font-weight: bold;
-    color: #00ffcc; /* Neon yeşil */
-    z-index: 10; /* En üstte görünsün */
-    white-space: nowrap; /* Asla alt satıra inmesin */
-}
-
-/* SOL VE SAĞ KELİMELER: Hayalet */
+/* YAN KELİMELER: Eşit Ağırlık (Flex 1) */
 #left-context, #right-context {
-    position: absolute; /* Bunlar da bağımsız */
+    flex: 1; /* Kalan boşluğu eşit paylaşın */
+    min-width: 0; /* Çok sıkışırlarsa küçülmelerine izin ver */
     font-size: 24px;
-    color: #444; /* Daha soluk gri */
-    width: 40%; /* Ekranın %40'ını kaplasınlar */
-    white-space: nowrap;
-    overflow: hidden; /* Çok uzunsa taşanı gizle */
+    color: #444; /* Soluk gri */
+    white-space: nowrap; /* Alt satıra inme */
+    overflow: hidden; /* Taşarsa gizle */
+    text-overflow: clip; /* ... koyma direkt kes */
 }
 
 #left-context {
-    right: 55%; /* Ortadan %5 uzak dursun */
-    text-align: right; /* Sağa yaslı (ortaya baksın) */
+    text-align: right; /* Yazıyı sağa (ortaya doğru) yasla */
 }
 
 #right-context {
-    left: 55%; /* Ortadan %5 uzak dursun */
-    text-align: left; /* Sola yaslı (ortaya baksın) */
+    text-align: left; /* Yazıyı sola (ortaya doğru) yasla */
 }
 
-/* Diğer Buton ve Kutu Ayarları (Aynı) */
+/* ANA KELİME: Dokunulmaz */
+#word-display {
+    flex: 0 0 auto; /* Sadece kendi genişliğin kadar yer kapla */
+    padding: 0 30px; /* Yanlara boşluk (Tampon Bölge) */
+    
+    font-size: 50px; /* Büyük font */
+    font-weight: bold;
+    color: #00ffcc; /* Neon yeşil */
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Diğer Ayarlar (Standart) */
 .file-upload {
     margin-bottom: 15px;
     display: flex;
