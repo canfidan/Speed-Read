@@ -7,7 +7,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 10px; /* Telefondan kenarlara yapışmasın */
+    padding: 10px;
     box-sizing: border-box;
 }
 
@@ -23,14 +23,13 @@ body {
 
 h2 { color: #00ffcc; margin-bottom: 20px; font-size: 24px; }
 
-/* Hızlı Başlangıç Butonları */
 .quick-start {
     margin-bottom: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap; /* Telefondan taşarsa alt satıra geçsin */
+    flex-wrap: wrap;
 }
 
 .quick-start span { font-size: 13px; color: #aaa; display: block; width: 100%; margin-bottom: 5px;}
@@ -44,7 +43,7 @@ h2 { color: #00ffcc; margin-bottom: 20px; font-size: 24px; }
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.2s;
-    flex: 1 1 auto; /* Kutuları esnek yap */
+    flex: 1 1 auto;
 }
 
 .sample-btn:hover {
@@ -53,7 +52,6 @@ h2 { color: #00ffcc; margin-bottom: 20px; font-size: 24px; }
     border-color: #00ffcc;
 }
 
-/* Okuma Alanı */
 .reading-area {
     display: flex;
     align-items: center;
@@ -70,7 +68,7 @@ h2 { color: #00ffcc; margin-bottom: 20px; font-size: 24px; }
 #left-context, #right-context {
     flex: 1;
     min-width: 0;
-    font-size: 18px; /* Telefondan sığsın diye biraz küçülttük */
+    font-size: 18px;
     color: #444;
     white-space: nowrap;
     overflow: hidden;
@@ -81,14 +79,13 @@ h2 { color: #00ffcc; margin-bottom: 20px; font-size: 24px; }
 #word-display {
     flex: 0 0 auto;
     padding: 0 10px;
-    font-size: 40px; /* Telefondan taşmaması için fontu optimize ettik */
+    font-size: 40px;
     font-weight: bold;
     color: #00ffcc;
     text-align: center;
 }
 .highlight { color: #ff3333; text-shadow: 0 0 10px rgba(255, 51, 51, 0.8); }
 
-/* Kontroller */
 .file-upload { margin-bottom: 20px; }
 .upload-btn {
     display: inline-block;
@@ -104,12 +101,11 @@ textarea {
 }
 .controls label { display: flex; align-items: center; gap: 5px; font-size: 14px; }
 
-/* Ana Buton Grubu */
 .read-controls {
     display: flex;
     justify-content: center;
     gap: 10px;
-    flex-wrap: wrap; /* Sığmazsa alt satıra geç */
+    flex-wrap: wrap;
 }
 
 button {
@@ -119,11 +115,9 @@ button {
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    /* Telefondan dokunmayı kolaylaştırmak için minimum yükseklik */
     min-height: 50px; 
 }
 
-/* Başlat butonu */
 #startBtn { 
     background-color: #28a745; 
     color: white; 
@@ -132,27 +126,72 @@ button {
     margin-bottom: 20px;
 }
 
-.primary-btn { background-color: #007bff; color: white; flex: 2; } /* Duraklat daha geniş olsun */
-.secondary-btn { background-color: #444; color: white; flex: 1; } /* Geri sar daha dar */
-.danger-btn { background-color: #dc3545; color: white; flex: 1; } /* Çıkış dar */
+.primary-btn { background-color: #007bff; color: white; flex: 2; }
+.secondary-btn { background-color: #444; color: white; flex: 1; }
+.danger-btn { background-color: #dc3545; color: white; flex: 1; }
 
 #saved-status { color: #ffc107; margin-top: 15px; font-size: 14px; }
 .hidden { display: none; }
 
-/* --- MOBİL İÇİN ÖZEL AYARLAR (En Önemli Kısım) --- */
 @media (max-width: 600px) {
     .reading-area { height: 140px; }
     #word-display { font-size: 32px; }
     #left-context, #right-context { font-size: 14px; }
     
-    /* Butonları telefonda alt alta değil ama daha rahat dizelim */
-    .read-controls {
-        flex-direction: row; /* Yan yana kalsın ama sığışsın */
-    }
-    
-    /* Buton metinlerini küçült */
+    .read-controls { flex-direction: row; }
     button { font-size: 14px; padding: 10px; }
-    
-    /* Geri sar butonu çok yer kaplamasın, sadece ikon kalsın */
     #rewindBtn { font-size: 12px; }
+}
+
+/* --- İMZA KUTUSU VE GLITCH STİLİ --- */
+.creator-badge {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(18, 18, 18, 0.9);
+    padding: 12px 24px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    font-size: 14px;
+    color: #888;
+    font-family: 'Courier New', Courier, monospace;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 9999; /* En üstte olduğundan emin olalım */
+    cursor: default;
+    user-select: none;
+}
+
+.creator-badge:hover {
+    transform: translateY(-5px) scale(1.05);
+    border-color: #00ffcc;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+}
+
+.dev-name {
+    color: #fff;
+    font-weight: 900;
+    display: inline-block;
+    min-width: 90px;
+    text-align: center;
+}
+
+.creator-badge:hover .dev-name {
+    color: #00ffcc;
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.8), 0 0 20px rgba(0, 255, 204, 0.4);
+}
+
+@media (max-width: 600px) {
+    .creator-badge {
+        bottom: 15px;
+        right: 50%;
+        transform: translateX(50%);
+        font-size: 12px;
+        padding: 10px 20px;
+        width: max-content;
+    }
+    .creator-badge:hover {
+        transform: translateX(50%) translateY(-5px);
+    }
 }

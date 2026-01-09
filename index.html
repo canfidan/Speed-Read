@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hızlı Okuma Asistanı</title>
     <link rel="stylesheet" href="style.css">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    <link rel="apple-touch-icon" href="icon.png">
 </head>
 <body>
 
@@ -19,13 +23,18 @@
                 <button class="sample-btn" data-id="3">🤖 Yapay Zeka</button>
             </div>
 
+            <div class="url-input-group">
+                <input type="text" id="wikiUrl" placeholder="Wikipedia linkini yapıştır (Örn: tr.wikipedia.org/wiki/Atatürk)">
+                <button id="fetchBtn">Getir 🌐</button>
+            </div>
+
             <div class="file-upload">
-                <label for="pdfInput" class="upload-btn">📂 Kendi PDF'ini Yükle</label>
+                <label for="pdfInput" class="upload-btn">📂 Veya Kendi PDF'ini Yükle</label>
                 <input type="file" id="pdfInput" accept="application/pdf" hidden>
                 <span id="fileName">Dosya seçilmedi</span>
             </div>
 
-            <textarea id="inputText" placeholder="Veya metni buraya yapıştır..."></textarea>
+            <textarea id="inputText" placeholder="Metni buraya yapıştır..."></textarea>
             
             <div class="controls">
                 <label>Hız (Ms): <input type="range" id="speedRange" min="50" max="1000" value="150"></label>
@@ -52,6 +61,18 @@
             </div>
         </div>
     </div>
+
+    <div class="creator-badge">
+        👨‍💻 Coded by <span class="dev-name">Can Fidan</span>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('Uygulama Yüklenebilir Modda! 📱'))
+                .catch(err => console.error('Hata:', err));
+        }
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="script.js"></script>

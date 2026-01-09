@@ -30,16 +30,15 @@ let currentIndex = 0;
 let isReading = false;
 let timeoutId = null;
 
-// --- ZAMAN TAKİBİ DEĞİŞKENLERİ ---
-let sessionStartTime = 0; // O anki oturumun başlangıcı
-let totalReadingTime = 0; // Toplam birikmiş süre (ms cinsinden)
+// --- ZAMAN TAKİBİ ---
+let sessionStartTime = 0; 
+let totalReadingTime = 0; 
 
 // Hazır Metin Butonları
 sampleBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
         const id = e.target.getAttribute('data-id');
         inputText.value = SAMPLE_TEXTS[id];
-        // Yeni metin seçince her şeyi sıfırla
         localStorage.removeItem('speedReadIndex');
         localStorage.removeItem('speedReadTime'); 
         currentIndex = 0;
@@ -55,7 +54,7 @@ sampleBtns.forEach(btn => {
     });
 });
 
-// Yardımcı: Kırmızı Odak Harfi
+// Formatlama
 function formatWord(word) {
     if (!word) return "";
     const centerIndex = Math.floor((word.length - 1) / 2);
@@ -65,22 +64,21 @@ function formatWord(word) {
     return `${start}<span class="highlight">${middle}</span>${end}`;
 }
 
-// --- SAYFA YÜKLENİNCE ---
+// Yükleme
 window.addEventListener('load', () => {
     const savedText = localStorage.getItem('speedReadText');
     const savedIndex = localStorage.getItem('speedReadIndex');
-    const savedTime = localStorage.getItem('speedReadTime'); // Kayıtlı süreyi çek
+    const savedTime = localStorage.getItem('speedReadTime');
 
     if (savedText && savedText.length > 0) {
         inputText.value = savedText;
         savedStatus.classList.remove('hidden');
         savedStatus.innerText = `💾 Kayıtlı okuma bulundu (%${Math.floor((savedIndex / savedText.split(/\s+/).length) * 100)})`;
         if (savedIndex) currentIndex = parseInt(savedIndex);
-        if (savedTime) totalReadingTime = parseInt(savedTime); // Süreyi yükle
+        if (savedTime) totalReadingTime = parseInt(savedTime);
     }
 });
 
-// PDF Yükleme
 pdfInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -102,7 +100,6 @@ pdfInput.addEventListener('change', async (e) => {
 
         inputText.value = fullText;
         startBtn.disabled = false;
-        // Yeni dosya, her şeyi sıfırla
         currentIndex = 0;
         totalReadingTime = 0;
         localStorage.removeItem('speedReadIndex');
@@ -114,7 +111,6 @@ pdfInput.addEventListener('change', async (e) => {
     }
 });
 
-// Başlat
 startBtn.addEventListener("click", () => {
     const text = inputText.value.trim();
     if (!text || text.startsWith("⏳")) return;
@@ -122,35 +118,27 @@ startBtn.addEventListener("click", () => {
     localStorage.setItem('speedReadText', text);
     words = text.split(/\s+/);
     
-    // Eğer başa döndüyse süreyi de sıfırla
     if (currentIndex === 0) totalReadingTime = 0; 
 
     setupPanel.classList.add("hidden");
     readPanel.classList.remove("hidden");
     
-    // Okumayı başlat ve saati kur
     isReading = true;
-    sessionStartTime = Date.now(); // Kronometreyi başlat
+    sessionStartTime = Date.now();
     pauseBtn.innerText = "⏸️ Duraklat";
     readLoop(); 
 });
 
-// Okuma Döngüsü
 function readLoop() {
     if (!isReading || currentIndex >= words.length) {
         if (currentIndex >= words.length) {
-             // --- BİTİŞ SENARYOSU ---
              isReading = false;
-             
-             // Son süreyi ekle
              updateTotalTime(); 
              
-             // Süreyi hesapla (Dakika ve Saniye)
              let totalSeconds = Math.floor(totalReadingTime / 1000);
              let mins = Math.floor(totalSeconds / 60);
              let secs = totalSeconds % 60;
              
-             // Ekrana Rapor Bas
              wordDisplay.style.fontSize = "30px";
              wordDisplay.innerHTML = `
                 <div style="color: #00ffcc; line-height: 1.5;">
@@ -161,7 +149,6 @@ function readLoop() {
                     </span>
                 </div>`;
                 
-             // Kayıtları temizle
              localStorage.removeItem('speedReadIndex');
              localStorage.removeItem('speedReadTime');
              pauseBtn.innerText = "🔄 Başa Dön";
@@ -176,9 +163,6 @@ function readLoop() {
     rightContext.innerText = words.slice(currentIndex + 1, currentIndex + 4).join(" ");
 
     progressBar.innerText = `Kelime: ${currentIndex + 1} / ${words.length}`;
-    
-    // Her kelimede değil ama durdurunca kaydetmek daha performanslıdır
-    // Ancak elektrik kesilirse diye index'i kaydediyoruz
     localStorage.setItem('speedReadIndex', currentIndex);
 
     let baseSpeed = parseInt(speedRange.value);
@@ -193,21 +177,18 @@ function readLoop() {
     timeoutId = setTimeout(readLoop, delay);
 }
 
-// Süre Hesaplama Yardımcısı
 function updateTotalTime() {
     const now = Date.now();
-    totalReadingTime += (now - sessionStartTime); // Geçen süreyi kumbaraya at
-    sessionStartTime = now; // Sayacı sıfırla (yeni başlangıç noktası şimdiki zaman)
-    localStorage.setItem('speedReadTime', totalReadingTime); // Hafızaya at
+    totalReadingTime += (now - sessionStartTime);
+    sessionStartTime = now;
+    localStorage.setItem('speedReadTime', totalReadingTime);
 }
 
-// Duraklat Butonu
 pauseBtn.addEventListener("click", () => {
     if (currentIndex >= words.length) {
-        // Başa sar
         currentIndex = 0;
         totalReadingTime = 0;
-        wordDisplay.style.fontSize = sizeRange.value + "px"; // Fontu düzelt
+        wordDisplay.style.fontSize = sizeRange.value + "px";
         isReading = true;
         sessionStartTime = Date.now();
         pauseBtn.innerText = "⏸️ Duraklat";
@@ -216,53 +197,40 @@ pauseBtn.addEventListener("click", () => {
     }
 
     if (isReading) {
-        // Durduruluyor
         isReading = false;
         if (timeoutId) clearTimeout(timeoutId);
-        updateTotalTime(); // Süreyi kaydet
+        updateTotalTime(); 
         pauseBtn.innerText = "▶️ Devam Et";
     } else {
-        // Devam ediliyor
         isReading = true;
-        sessionStartTime = Date.now(); // Sayacı tekrar başlat
+        sessionStartTime = Date.now();
         pauseBtn.innerText = "⏸️ Duraklat";
         readLoop();
     }
 });
 
-// Çıkış Butonu
 exitBtn.addEventListener("click", () => {
     const wasReading = isReading;
     isReading = false;
     if (timeoutId) clearTimeout(timeoutId);
-    
-    if (wasReading) updateTotalTime(); // Çıkarken süreyi kaydet
+    if (wasReading) updateTotalTime();
     
     pauseBtn.innerText = "▶️ Devam Et";
 
     const confirm1 = confirm("Okuma ekranından çıkmak istediğine emin misin?");
-    
     if (confirm1) {
         const confirm2 = confirm("Gerçekten ana ekrana dönüyor musun? (Kaldığın yer kaydedilecek)");
-        
         if (confirm2) {
             setupPanel.classList.remove("hidden");
             readPanel.classList.add("hidden");
             savedStatus.innerText = `💾 Duraklatıldı: %${Math.floor((currentIndex / words.length) * 100)}`;
             savedStatus.classList.remove('hidden');
-        } else {
-            // Vazgeçtiyse bir şey yapma, duraklatılmış kalsın
         }
     }
 });
 
-// Geri Sar
 rewindBtn.addEventListener("click", () => {
     if (timeoutId) clearTimeout(timeoutId);
-    
-    // Geri sararken süreyi etkilemiyoruz (Okuma süresi akmaya devam edebilir veya durabilir)
-    // Basitlik için akışı bozmuyoruz.
-    
     currentIndex = Math.max(0, currentIndex - 10);
     
     wordDisplay.innerHTML = formatWord(words[currentIndex]);
@@ -276,3 +244,40 @@ rewindBtn.addEventListener("click", () => {
 sizeRange.addEventListener("input", (e) => {
     wordDisplay.style.fontSize = e.target.value + "px";
 });
+
+// ==========================================
+// GLITCH ANİMASYONU 🤖
+// ==========================================
+// Burası en altta çalışacak
+setTimeout(() => {
+    const badge = document.querySelector('.creator-badge');
+    const nameElement = document.querySelector('.dev-name');
+
+    if (badge && nameElement) {
+        const originalName = nameElement.innerText; 
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890#@$X_\\/<>";
+        let interval = null;
+
+        badge.onmouseover = event => {  
+          let iteration = 0;
+          clearInterval(interval);
+          
+          interval = setInterval(() => {
+            nameElement.innerText = originalName
+              .split("")
+              .map((letter, index) => {
+                if(index < iteration) return originalName[index];
+                return letters[Math.floor(Math.random() * letters.length)];
+              })
+              .join("");
+            
+            if(iteration >= originalName.length){ 
+              clearInterval(interval);
+              nameElement.innerText = originalName;
+            }
+            
+            iteration += 1 / 2; 
+          }, 30);
+        }
+    }
+}, 500); // 0.5 saniye bekle ki HTML tam yüklensin
