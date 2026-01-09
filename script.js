@@ -1,90 +1,70 @@
-// PDF Kütüphanesini Tanıt
-// Eğer pdfjsLib yüklenmediyse uyarı ver
-if (typeof pdfjsLib === 'undefined') {
-    alert("HATA: PDF kütüphanesi yüklenemedi! İnternet bağlantını kontrol et.");
-} else {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-}
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 const inputText = document.getElementById("inputText");
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 const wordDisplay = document.getElementById("word-display");
+const leftContext = document.getElementById("left-context");   // YENİ
+const rightContext = document.getElementById("right-context"); // YENİ
 const setupPanel = document.getElementById("setup-panel");
 const readPanel = document.getElementById("read-panel");
 const speedRange = document.getElementById("speedRange");
 const sizeRange = document.getElementById("sizeRange");
 const pdfInput = document.getElementById("pdfInput");
 const fileNameLabel = document.getElementById("fileName");
+const progressBar = document.getElementById("progress-bar");
 
 let words = [];
 let currentIndex = 0;
 let intervalId = null;
 
-// PDF Yükleme Olayı
+// PDF Yükleme
 pdfInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     fileNameLabel.innerText = file.name;
-    inputText.value = "⏳ PDF okunuyor, lütfen bekleyin...";
-    alert("Dosya seçildi: " + file.name + ". İşlem başlıyor...");
+    inputText.value = "⏳ PDF okunuyor...";
+    startBtn.disabled = true;
 
     try {
         const arrayBuffer = await file.arrayBuffer();
-        
-        // PDF Belgesini Yükle
-        const loadingTask = pdfjsLib.getDocument(arrayBuffer);
-        const pdf = await loadingTask.promise;
-        
-        alert("PDF Başarıyla açıldı! Sayfa sayısı: " + pdf.numPages);
-
+        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
         let fullText = "";
 
-        // Sayfaları Tek Tek Gez
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
-            
-            // Sayfadaki yazıları birleştir
             const pageText = textContent.items.map(item => item.str).join(' ');
             fullText += pageText + " ";
         }
 
-        if (fullText.trim().length === 0) {
-            alert("UYARI: PDF içinde okunabilir metin bulunamadı! Bu bir resim veya taranmış kitap olabilir.");
-            inputText.value = "Bu PDF metin içermiyor (Resim olabilir).";
-        } else {
-            inputText.value = fullText;
-            alert("İşlem Tamam! " + fullText.length + " karakter okundu.");
-        }
+        inputText.value = fullText;
+        startBtn.disabled = false;
         
     } catch (err) {
         console.error(err);
-        alert("BİR HATA OLUŞTU:\n" + err.message);
-        inputText.value = "Hata oluştu: " + err.message;
+        inputText.value = "Hata: PDF okunamadı.";
+        startBtn.disabled = false;
     }
 });
 
-// Başlat Butonu
 startBtn.addEventListener("click", () => {
     const text = inputText.value.trim();
-    // "PDF okunuyor" yazarken başlatmayı engelle
-    if (!text || text.startsWith("⏳") || text.startsWith("Hata")) {
-        alert("Lütfen geçerli bir metin yüklenmesini bekleyin.");
-        return;
-    }
+    if (!text || text.startsWith("⏳")) return;
 
-    words = text.split(/\s+/);
+    words = text.split(/\s+/); // Boşluklara göre böl
     currentIndex = 0;
 
     setupPanel.classList.add("hidden");
     readPanel.classList.remove("hidden");
+
     startReading();
 });
 
 function startReading() {
     const speed = parseInt(speedRange.value);
+
     if (intervalId) clearInterval(intervalId);
 
     intervalId = setInterval(() => {
@@ -92,7 +72,23 @@ function startReading() {
             stopReading();
             return;
         }
+        
+        // 1. ORTA KELİME
         wordDisplay.innerText = words[currentIndex];
+
+        // 2. SOLDAKİ 3 KELİME (Varsa)
+        // Başlangıçta negatif index olmaması için Math.max kullanıyoruz
+        let startLeft = Math.max(0, currentIndex - 3);
+        let leftWords = words.slice(startLeft, currentIndex).join(" ");
+        leftContext.innerText = leftWords;
+
+        // 3. SAĞDAKİ 3 KELİME (Varsa)
+        let rightWords = words.slice(currentIndex + 1, currentIndex + 4).join(" ");
+        rightContext.innerText = rightWords;
+
+        // İlerleme Çubuğu
+        progressBar.innerText = `Kelime: ${currentIndex + 1} / ${words.length}`;
+        
         currentIndex++;
     }, speed);
 }
@@ -104,6 +100,8 @@ function stopReading() {
     setupPanel.classList.remove("hidden");
     readPanel.classList.add("hidden");
     wordDisplay.innerText = "Hazır...";
+    leftContext.innerText = "";
+    rightContext.innerText = "";
 }
 
 sizeRange.addEventListener("input", (e) => {

@@ -10,12 +10,46 @@ body {
 }
 
 .container {
-    width: 90%;
-    max-width: 600px;
+    width: 95%; /* Telefondan taşmaması için */
+    max-width: 800px;
     text-align: center;
 }
 
-/* PDF Yükleme Alanı */
+/* Okuma Alanı Düzeni */
+.reading-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    gap: 20px; /* Kelimeler arası boşluk */
+    overflow: hidden; /* Taşmayı engelle */
+}
+
+/* Sol ve Sağ Kelimeler */
+#left-context, #right-context {
+    font-size: 24px;
+    color: #555; /* Soluk gri */
+    flex: 1; /* Boş alanı kapla */
+    white-space: nowrap; /* Alt satıra inmesin */
+}
+
+#left-context {
+    text-align: right; /* Ortaya yasla */
+}
+
+#right-context {
+    text-align: left; /* Ortaya yasla */
+}
+
+/* Ana Kelime (Orta) */
+#word-display {
+    font-size: 50px;
+    font-weight: bold;
+    color: #00ffcc; /* Neon yeşil */
+    flex: 0 0 auto; /* Kendi boyutu kadar yer kaplasın */
+}
+
+/* Diğer Ayarlar */
 .file-upload {
     margin-bottom: 15px;
     display: flex;
@@ -25,15 +59,11 @@ body {
 }
 
 .upload-btn {
-    background-color: #28a745; /* Yeşil buton */
+    background-color: #28a745;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-}
-
-.upload-btn:hover {
-    background-color: #218838;
 }
 
 textarea {
@@ -49,19 +79,13 @@ textarea {
     resize: none;
 }
 
-#word-display {
-    font-size: 50px;
-    font-weight: bold;
-    height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #00ffcc;
+#progress-bar {
+    color: #888;
+    margin-bottom: 20px;
+    font-size: 14px;
 }
 
-.hidden {
-    display: none;
-}
+.hidden { display: none; }
 
 button {
     background-color: #007bff;
@@ -70,11 +94,5 @@ button {
     padding: 15px 30px;
     font-size: 18px;
     border-radius: 5px;
-    margin-top: 20px;
     cursor: pointer;
-}
-
-button:disabled {
-    background-color: #555;
-    cursor: not-allowed;
 }
