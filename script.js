@@ -9,8 +9,8 @@ const SAMPLE_TEXTS = {
 
 const inputText = document.getElementById("inputText");
 const startBtn = document.getElementById("startBtn");
-const pauseBtn = document.getElementById("pauseBtn"); // YENİ
-const exitBtn = document.getElementById("exitBtn");   // YENİ
+const pauseBtn = document.getElementById("pauseBtn");
+const exitBtn = document.getElementById("exitBtn");
 const rewindBtn = document.getElementById("rewindBtn");
 const wordDisplay = document.getElementById("word-display");
 const leftContext = document.getElementById("left-context");
@@ -30,14 +30,22 @@ let currentIndex = 0;
 let isReading = false;
 let timeoutId = null;
 
+// --- ZAMAN TAKİBİ DEĞİŞKENLERİ ---
+let sessionStartTime = 0; // O anki oturumun başlangıcı
+let totalReadingTime = 0; // Toplam birikmiş süre (ms cinsinden)
+
 // Hazır Metin Butonları
 sampleBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
         const id = e.target.getAttribute('data-id');
         inputText.value = SAMPLE_TEXTS[id];
+        // Yeni metin seçince her şeyi sıfırla
         localStorage.removeItem('speedReadIndex');
+        localStorage.removeItem('speedReadTime'); 
         currentIndex = 0;
+        totalReadingTime = 0;
         savedStatus.classList.add('hidden');
+        
         e.target.innerText = "✅ Yüklendi!";
         setTimeout(() => {
             if(id == 1) e.target.innerText = "📚 Hızlı Okuma Nedir?";
@@ -57,15 +65,18 @@ function formatWord(word) {
     return `${start}<span class="highlight">${middle}</span>${end}`;
 }
 
+// --- SAYFA YÜKLENİNCE ---
 window.addEventListener('load', () => {
     const savedText = localStorage.getItem('speedReadText');
     const savedIndex = localStorage.getItem('speedReadIndex');
+    const savedTime = localStorage.getItem('speedReadTime'); // Kayıtlı süreyi çek
 
     if (savedText && savedText.length > 0) {
         inputText.value = savedText;
         savedStatus.classList.remove('hidden');
         savedStatus.innerText = `💾 Kayıtlı okuma bulundu (%${Math.floor((savedIndex / savedText.split(/\s+/).length) * 100)})`;
         if (savedIndex) currentIndex = parseInt(savedIndex);
+        if (savedTime) totalReadingTime = parseInt(savedTime); // Süreyi yükle
     }
 });
 
@@ -91,8 +102,11 @@ pdfInput.addEventListener('change', async (e) => {
 
         inputText.value = fullText;
         startBtn.disabled = false;
+        // Yeni dosya, her şeyi sıfırla
         currentIndex = 0;
+        totalReadingTime = 0;
         localStorage.removeItem('speedReadIndex');
+        localStorage.removeItem('speedReadTime');
     } catch (err) {
         console.error(err);
         inputText.value = "Hata: PDF okunamadı.";
@@ -108,25 +122,48 @@ startBtn.addEventListener("click", () => {
     localStorage.setItem('speedReadText', text);
     words = text.split(/\s+/);
     
-    if (currentIndex >= words.length) currentIndex = 0;
+    // Eğer başa döndüyse süreyi de sıfırla
+    if (currentIndex === 0) totalReadingTime = 0; 
 
     setupPanel.classList.add("hidden");
     readPanel.classList.remove("hidden");
     
-    // Okumayı başlat
+    // Okumayı başlat ve saati kur
     isReading = true;
+    sessionStartTime = Date.now(); // Kronometreyi başlat
     pauseBtn.innerText = "⏸️ Duraklat";
     readLoop(); 
 });
 
 // Okuma Döngüsü
 function readLoop() {
-    // Okuma durduysa veya bittiyse dur
     if (!isReading || currentIndex >= words.length) {
         if (currentIndex >= words.length) {
-             wordDisplay.innerHTML = "Bitti! 🎉";
-             localStorage.removeItem('speedReadIndex');
+             // --- BİTİŞ SENARYOSU ---
              isReading = false;
+             
+             // Son süreyi ekle
+             updateTotalTime(); 
+             
+             // Süreyi hesapla (Dakika ve Saniye)
+             let totalSeconds = Math.floor(totalReadingTime / 1000);
+             let mins = Math.floor(totalSeconds / 60);
+             let secs = totalSeconds % 60;
+             
+             // Ekrana Rapor Bas
+             wordDisplay.style.fontSize = "30px";
+             wordDisplay.innerHTML = `
+                <div style="color: #00ffcc; line-height: 1.5;">
+                    🎉 TEBRİKLER! 🎉<br>
+                    <span style="color: white; font-size: 24px;">
+                        ${words.length} kelimeyi<br>
+                        <span style="color: #ffc107;">${mins} dk ${secs} sn</span> içinde okudun.
+                    </span>
+                </div>`;
+                
+             // Kayıtları temizle
+             localStorage.removeItem('speedReadIndex');
+             localStorage.removeItem('speedReadTime');
              pauseBtn.innerText = "🔄 Başa Dön";
         }
         return;
@@ -139,6 +176,9 @@ function readLoop() {
     rightContext.innerText = words.slice(currentIndex + 1, currentIndex + 4).join(" ");
 
     progressBar.innerText = `Kelime: ${currentIndex + 1} / ${words.length}`;
+    
+    // Her kelimede değil ama durdurunca kaydetmek daha performanslıdır
+    // Ancak elektrik kesilirse diye index'i kaydediyoruz
     localStorage.setItem('speedReadIndex', currentIndex);
 
     let baseSpeed = parseInt(speedRange.value);
@@ -153,68 +193,81 @@ function readLoop() {
     timeoutId = setTimeout(readLoop, delay);
 }
 
-// --- YENİ: DURAKLAT BUTONU ---
+// Süre Hesaplama Yardımcısı
+function updateTotalTime() {
+    const now = Date.now();
+    totalReadingTime += (now - sessionStartTime); // Geçen süreyi kumbaraya at
+    sessionStartTime = now; // Sayacı sıfırla (yeni başlangıç noktası şimdiki zaman)
+    localStorage.setItem('speedReadTime', totalReadingTime); // Hafızaya at
+}
+
+// Duraklat Butonu
 pauseBtn.addEventListener("click", () => {
     if (currentIndex >= words.length) {
-        // Eğer bitmişse ve butona basıldıysa başa sar
+        // Başa sar
         currentIndex = 0;
+        totalReadingTime = 0;
+        wordDisplay.style.fontSize = sizeRange.value + "px"; // Fontu düzelt
         isReading = true;
+        sessionStartTime = Date.now();
         pauseBtn.innerText = "⏸️ Duraklat";
         readLoop();
         return;
     }
 
     if (isReading) {
-        // Okuyorsa DURDUR
+        // Durduruluyor
         isReading = false;
         if (timeoutId) clearTimeout(timeoutId);
+        updateTotalTime(); // Süreyi kaydet
         pauseBtn.innerText = "▶️ Devam Et";
     } else {
-        // Durmuşsa DEVAM ET
+        // Devam ediliyor
         isReading = true;
+        sessionStartTime = Date.now(); // Sayacı tekrar başlat
         pauseBtn.innerText = "⏸️ Duraklat";
         readLoop();
     }
 });
 
-// --- YENİ: ÇIKIŞ BUTONU (2 Kere Sor) ---
+// Çıkış Butonu
 exitBtn.addEventListener("click", () => {
-    // Okumayı geçici durdur
     const wasReading = isReading;
     isReading = false;
     if (timeoutId) clearTimeout(timeoutId);
+    
+    if (wasReading) updateTotalTime(); // Çıkarken süreyi kaydet
+    
     pauseBtn.innerText = "▶️ Devam Et";
 
-    // 1. Soru
     const confirm1 = confirm("Okuma ekranından çıkmak istediğine emin misin?");
     
     if (confirm1) {
-        // 2. Soru
         const confirm2 = confirm("Gerçekten ana ekrana dönüyor musun? (Kaldığın yer kaydedilecek)");
         
         if (confirm2) {
-            // Çıkış Onaylandı
             setupPanel.classList.remove("hidden");
             readPanel.classList.add("hidden");
             savedStatus.innerText = `💾 Duraklatıldı: %${Math.floor((currentIndex / words.length) * 100)}`;
             savedStatus.classList.remove('hidden');
         } else {
-            // İkinci soruda vazgeçerse devam et (opsiyonel) veya duraklatılmış bırak
+            // Vazgeçtiyse bir şey yapma, duraklatılmış kalsın
         }
-    } else {
-        // İlk soruda vazgeçerse, kullanıcı isterse "Devam Et"e basar
     }
 });
 
 // Geri Sar
 rewindBtn.addEventListener("click", () => {
     if (timeoutId) clearTimeout(timeoutId);
-    currentIndex = Math.max(0, currentIndex - 10); // 10 kelime
+    
+    // Geri sararken süreyi etkilemiyoruz (Okuma süresi akmaya devam edebilir veya durabilir)
+    // Basitlik için akışı bozmuyoruz.
+    
+    currentIndex = Math.max(0, currentIndex - 10);
     
     wordDisplay.innerHTML = formatWord(words[currentIndex]);
     progressBar.innerText = `Geri sarıldı: ${currentIndex + 1}`;
     
-    // Eğer okuma aktifse 1sn sonra devam et, değilse duruk kalsın
     if (isReading) {
         setTimeout(() => { readLoop(); }, 1000);
     }
