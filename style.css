@@ -46,6 +46,11 @@ body {
     color: #00ffcc;
     text-align: center;
 }
+.highlight {
+    color: #ff3333; /* Parlak Kırmızı */
+    text-shadow: 0 0 10px rgba(255, 51, 51, 0.8); /* Hafif neon parlaması */
+}
+}
 
 /* Kontroller */
 .file-upload {
