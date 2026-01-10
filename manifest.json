@@ -1,21 +1,24 @@
 {
+  "manifest_version": 3,
   "name": "Hızlı Okuma Asistanı",
-  "short_name": "SpeedRead",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#00ffcc",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "version": "1.0",
+  "description": "Seçilen metni sağ tık ile hızlı okuyun.",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "icon.png"
+  },
+  "icons": {
+    "128": "icon.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://cdnjs.cloudflare.com; object-src 'self'"
+  }
 }
