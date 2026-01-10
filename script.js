@@ -1,3 +1,32 @@
+// ==========================================
+// 🧩 CHROME EKLENTİSİ: OTO-BAŞLAT MODU
+// ==========================================
+if (typeof chrome !== 'undefined' && chrome.storage) {
+    chrome.storage.local.get(['secilenMetin'], function(result) {
+        if (result.secilenMetin) {
+            setTimeout(() => {
+                const inputText = document.getElementById("inputText");
+                const startBtn = document.getElementById("startBtn");
+
+                if(inputText && startBtn) {
+                    inputText.value = result.secilenMetin;
+                    chrome.storage.local.remove(['secilenMetin']);
+                    
+                    console.log("Otomatik başlatılıyor...");
+                    // Yeni metin geldiği için değişkenleri sıfırla
+                    currentIndex = 0; 
+                    totalReadingTime = 0;
+                    startBtn.click();
+                }
+            }, 300);
+        }
+    });
+}
+
+// ==========================================
+// ⚙️ UYGULAMA AYARLARI
+// ==========================================
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
 
 // --- HAZIR METİNLER ---
@@ -29,8 +58,6 @@ let words = [];
 let currentIndex = 0;
 let isReading = false;
 let timeoutId = null;
-
-// --- ZAMAN TAKİBİ ---
 let sessionStartTime = 0; 
 let totalReadingTime = 0; 
 
@@ -39,6 +66,8 @@ sampleBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
         const id = e.target.getAttribute('data-id');
         inputText.value = SAMPLE_TEXTS[id];
+        
+        // Yeni metin seçilince SIFIRLA
         localStorage.removeItem('speedReadIndex');
         localStorage.removeItem('speedReadTime'); 
         currentIndex = 0;
@@ -54,7 +83,6 @@ sampleBtns.forEach(btn => {
     });
 });
 
-// Formatlama
 function formatWord(word) {
     if (!word) return "";
     const centerIndex = Math.floor((word.length - 1) / 2);
@@ -91,15 +119,15 @@ pdfInput.addEventListener('change', async (e) => {
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
         let fullText = "";
-
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
             fullText += textContent.items.map(item => item.str).join(' ') + " ";
         }
-
         inputText.value = fullText;
         startBtn.disabled = false;
+        
+        // Yeni dosya -> SIFIRLA
         currentIndex = 0;
         totalReadingTime = 0;
         localStorage.removeItem('speedReadIndex');
@@ -111,14 +139,27 @@ pdfInput.addEventListener('change', async (e) => {
     }
 });
 
+// BAŞLAT BUTONU - GÜNCELLENDİ 🛠️
 startBtn.addEventListener("click", () => {
     const text = inputText.value.trim();
     if (!text || text.startsWith("⏳")) return;
 
+    // 1. Yazı değişmiş mi kontrol et
+    const previousText = localStorage.getItem('speedReadText');
+    
+    // Eğer yeni yazı, hafızadakiyle aynı değilse SIFIRLA
+    if (text !== previousText) {
+        currentIndex = 0;
+        totalReadingTime = 0;
+        localStorage.removeItem('speedReadIndex');
+        console.log("Yeni metin algılandı, sayaç sıfırlandı.");
+    }
+
     localStorage.setItem('speedReadText', text);
     words = text.split(/\s+/);
     
-    if (currentIndex === 0) totalReadingTime = 0; 
+    // Güvenlik önlemi: Eğer kelimeler bittiyse ve tekrar başla denirse
+    if (currentIndex >= words.length) currentIndex = 0;
 
     setupPanel.classList.add("hidden");
     readPanel.classList.remove("hidden");
@@ -129,6 +170,7 @@ startBtn.addEventListener("click", () => {
     readLoop(); 
 });
 
+// OKUMA DÖNGÜSÜ - GÜNCELLENDİ 🛠️
 function readLoop() {
     if (!isReading || currentIndex >= words.length) {
         if (currentIndex >= words.length) {
@@ -169,9 +211,16 @@ function readLoop() {
     let delay = baseSpeed;
     const currentWord = words[currentIndex];
 
-    if (currentWord.endsWith('.') || currentWord.endsWith('!') || currentWord.endsWith('?')) delay = baseSpeed * 2.2; 
-    else if (currentWord.endsWith(',') || currentWord.endsWith(';')) delay = baseSpeed * 1.5; 
-    else if (currentWord.length > 10) delay = baseSpeed * 1.3;
+    // --- ISINMA TURU (İLK 5 KELİME YAVAŞ) 🐢 ---
+    if (currentIndex < 5) {
+        delay = baseSpeed * 2.5; // İlk kelimeler 2.5 kat daha yavaş
+    } 
+    // Normal Noktalama Beklemeleri
+    else {
+        if (currentWord.endsWith('.') || currentWord.endsWith('!') || currentWord.endsWith('?')) delay = baseSpeed * 2.2; 
+        else if (currentWord.endsWith(',') || currentWord.endsWith(';')) delay = baseSpeed * 1.5; 
+        else if (currentWord.length > 10) delay = baseSpeed * 1.3;
+    }
 
     currentIndex++;
     timeoutId = setTimeout(readLoop, delay);
@@ -245,10 +294,7 @@ sizeRange.addEventListener("input", (e) => {
     wordDisplay.style.fontSize = e.target.value + "px";
 });
 
-// ==========================================
-// GLITCH ANİMASYONU 🤖
-// ==========================================
-// Burası en altta çalışacak
+// GLITCH ANİMASYONU
 setTimeout(() => {
     const badge = document.querySelector('.creator-badge');
     const nameElement = document.querySelector('.dev-name');
@@ -280,4 +326,4 @@ setTimeout(() => {
           }, 30);
         }
     }
-}, 500); // 0.5 saniye bekle ki HTML tam yüklensin
+}, 500);
